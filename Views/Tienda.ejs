@@ -1,0 +1,275 @@
+<script>
+  function addIdToUrlAndSubmit(id) {
+    const form = document.createElement('form');
+    form.method = 'get';
+    form.action = '/vistaDetalle';
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'id';
+    input.value = id;
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+  }
+  function renderProductos(productos) {
+
+    const container = document.getElementById('contenedor');
+    if (productos.length == 0) {
+      container.innerHTML = '<p class="lorem_text">No hay productos para mostrar</p>'
+    } else {
+      productos.forEach(producto => {
+        const colDiv = document.createElement('div');
+        colDiv.className = 'col';
+
+        const boxSectionDiv = document.createElement('div');
+        boxSectionDiv.className = 'box_section';
+
+        const nombreH2 = document.createElement('h2');
+        nombreH2.className = 'dolor_text';
+        nombreH2.textContent = producto.nombre;
+        boxSectionDiv.appendChild(nombreH2);
+
+        const imagenDiv = document.createElement('div');
+        imagenDiv.className = 'image_4';
+        const img = document.createElement('img');
+        img.src = producto.imagen;
+        imagenDiv.appendChild(img);
+        boxSectionDiv.appendChild(imagenDiv);
+
+        const precioH2 = document.createElement('h2');
+        precioH2.className = 'dolor_text';
+        precioH2.innerHTML = `$<span style="color: #ebc30a;">${producto.precio}</span>`;
+        boxSectionDiv.appendChild(precioH2);
+
+        const unidadesH2 = document.createElement('h2');
+        unidadesH2.className = 'dolor_text';
+        unidadesH2.textContent = `${producto.unidades} unidades`;
+        boxSectionDiv.appendChild(unidadesH2);
+
+        const stockH2 = document.createElement('h2');
+        stockH2.className = 'dolor_text_1';
+        stockH2.innerHTML = `<span style="color: #ebc30a;">${producto.stock}</span> disponibles`;
+        boxSectionDiv.appendChild(stockH2);
+
+        const descripcionP = document.createElement('p');
+        descripcionP.className = 'tempor_text';
+        descripcionP.textContent = producto.descripcion;
+        boxSectionDiv.appendChild(descripcionP);
+
+        const form = document.createElement('form');
+        form.className = 'search-form';
+        form.id = 'hform';
+        form.action = '/vistaDetalle';
+        form.method = 'get';
+
+        const buyButtonDiv = document.createElement('div');
+        buyButtonDiv.className = 'buy_bt_1';
+        const buyButton = document.createElement('a');
+        buyButton.textContent = 'Comprar';
+        buyButton.href = 'javascript:void(0);'; // Para evitar el cambio de URL
+        buyButton.onclick = () => addIdToUrlAndSubmit(producto.id);
+        buyButtonDiv.appendChild(buyButton);
+
+        form.appendChild(buyButtonDiv);
+        boxSectionDiv.appendChild(form);
+
+        colDiv.appendChild(boxSectionDiv);
+        container.appendChild(colDiv);
+      });
+    }
+
+  }
+
+
+  async function fetchProductos(bNombre) {
+    if (!bNombre || bNombre == "") {
+
+      try {
+        const response = await fetch('/api/buscarproductos');
+        p = await response.json()
+
+        renderProductos(await p.productos)
+
+        PRODUCTOS_GLOBAL = await p.productos
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+      } catch (error) {
+        console.error('Problema consultando productos', error);
+      }
+    } else {
+      try {
+        const response = await fetch(`/api/buscarproductos?nombre=${bNombre}`);
+
+        const resultsContainer = document.getElementById('contenedor');
+        resultsContainer.innerHTML = ''
+        p = await response.json()
+        renderProductos(await p.productos)
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+      } catch (error) {
+        console.error('Problema consultando productos', error);
+      }
+    }
+
+
+  }
+  function handlerSearch() {
+
+    const categoriaSelect = document.getElementById("categoriaSelect");
+    const subcategoriaSelect = document.getElementById("subcategoriaSelect");
+
+    const selectedCategoria = categoriaSelect.options[categoriaSelect.selectedIndex].value;
+    const selectedSubcategoria = subcategoriaSelect.options[subcategoriaSelect.selectedIndex].value;
+
+    const searchInput = document.getElementById('inputBusqueda');
+
+    const resultsContainer = document.getElementById('contenedor');
+    const query = searchInput.value;
+    if (query != "") {
+
+      fetchProductos(query)
+    }
+    if (selectedCategoria != "" && selectedSubcategoria != "") {
+      p = PRODUCTOS_GLOBAL.filter(e => (e.nombre.toLowerCase().includes(query.toLowerCase())) && (e.categoria == selectedCategoria && e.subcategoria == selectedSubcategoria))
+
+    } else if (selectedCategoria == "" && selectedSubcategoria != "") {
+      p = PRODUCTOS_GLOBAL.filter(e => (e.nombre.toLowerCase().includes(query.toLowerCase())) && ( e.subcategoria == selectedSubcategoria))
+
+    } else if (selectedCategoria != "" && selectedSubcategoria == "") {
+
+      p = PRODUCTOS_GLOBAL.filter(e => (e.nombre.toLowerCase().includes(query.toLowerCase())) && (e.categoria == selectedCategoria ))
+    } else {
+
+
+
+      console.log("nada")
+      p = PRODUCTOS_GLOBAL.filter(e => e.nombre.toLowerCase().includes(query.toLowerCase()))
+
+    }
+
+    resultsContainer.innerHTML = ''
+    renderProductos(p)
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+
+
+    const searchInput = document.getElementById('inputBusqueda');
+    const resultsContainer = document.getElementById('contenedor');
+    
+    fetchProductos()
+
+      searchInput.addEventListener('input', function () {
+    
+      const query = searchInput.value;
+      p = PRODUCTOS_GLOBAL.filter(e => e.nombre.toLowerCase().includes(query.toLowerCase()))
+
+      resultsContainer.innerHTML = ''
+      renderProductos(p)
+    });
+  });
+</script>
+
+<%- include('header') -%>
+
+  <div class="about_section">
+    <!--vegetables  section start -->
+    <div class="vegetables_section layout_padding">
+      <div class="container">
+        <h1 class="about_taital">Nuestro productos</h1>
+        <p class="lorem_text">Eficiencia y comodidad en cada compra, para un trabajo más ágil.</p>
+        <br>
+        <div class="search-container">
+
+          <input id="inputBusqueda" type="text" class="search-input" name="nombre" placeholder="Buscar...">
+
+          <select id="categoriaSelect" class="search-select">
+            <option value="">Seleccione categoría </option>
+
+            <% for(var i=0; i < categorias[0].length; i++) { %>
+              <option value="<%=categorias[0][i].nombre%>">
+                <%=categorias[0][i].nombre%>
+              </option>
+
+              <%}%>
+
+          </select>
+          <span></span>
+
+          <select id="subcategoriaSelect" class="search-select">
+            <option value="">Seleccione subcategoría </option>
+            <% for(var i=0; i < categorias[1].length; i++) { %>
+              <option value="<%=categorias[1][i].nombre%>">
+                <%=categorias[1][i].nombre%>
+              </option>
+
+              <%}%>
+          </select>
+
+          <button type="submit" class="search-button" onclick="handlerSearch()">Buscar</button>
+
+        </div>
+
+        <div class="vegetables_section_2 layout_padding">
+          <div class="contenedor" id="contenedor">
+            <% if(productos.length==0){ %>
+
+              <% }%>
+
+                <% for(var i=0; i < productos.length; i++) { %>
+                  <!--
+ <div class="col">
+              <div class="box_section">
+                <h2 class="dolor_text"><%= productos[i].nombre%></h2>
+                <div class="image_4"><img src="<%= productos[i].imagen%>"></div>
+                <h2 class="dolor_text">$<span style="color: #ebc30a;"><%= productos[i].precio%></span></h2>
+                <h2 class="dolor_text"><%= productos[i].unidades %> unidades</h2>
+                <h2 class="dolor_text_1"><span style="color: #ebc30a;"><%= productos[i].stock%></span> disponibles</h2>
+                <p class="tempor_text"><%= productos[i].descripcion %></p>
+               
+                <form class="search-form" id ="hform" action="/vistaDetalle" method="get">
+                 
+                  <div class="buy_bt_1"> <a onclick="addIdToUrlAndSubmit(<%= productos[i].id %>)">Comprar</a></div>
+                </form>
+
+
+              </div>
+            </div>
+
+       -->
+
+                  <% } %>
+
+                    <script>
+                      function addIdToUrlAndSubmit(id) {
+                        // Obtener la URL actual
+
+                        var url = window.location.href.split("/")[0];
+
+                        // Añadir el parámetro "id" a la URL
+                        var newUrl = url + '/vistaDetalle?id=' + id;
+
+                        // Redireccionar a la nueva URL
+                        window.location.href = newUrl;
+                      }
+                    </script>
+
+
+
+          </div>
+
+        </div>
+        <div class="read_bt_1"><a href="#">Read More</a></div>
+      </div>
+    </div>
+  </div>
+  <!--vegetables section end -->
+  <script>
+
+    fetchProductos();
+
+  </script>
+  <%- include('footer') -%>

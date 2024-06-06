@@ -1,0 +1,81 @@
+<%- include('header') -%>
+    <% for(var i=0; i < productos.length; i++) { %>
+
+        <div class="container_2">
+            <div class="product-details">
+                <h2>
+                    <%= productos[i].nombre%>
+                </h2>
+                <img class="product-image" src="<%= productos[i].imagen%>" alt="Imagen del Producto">
+                <p>Precio: $
+                    <span style="color: #ebc30a;">
+                        <%= productos[i].precio%>
+                    </span>
+                </p>
+                <p>Stock actual: <%= productos[i].stock %>
+                </p>
+                <p>
+                    <%= productos[i].descripcion %>
+                </p>
+            </div>
+            <div class="buy-options">
+                <h2>Opciones de Compra</h2>
+                <form action="#" method="post">
+                    <label for="cantidad">Cantidad:</label>
+                    <br>
+                    <input type="number" id="cantidad" name="cantidad" min="1" value="1">
+
+                    <button type="submit" class="buy-button">Agregar al Carrito</button>
+                    <br>
+                    <h2>Especificaciones producto</h2>
+
+
+                    <ul>
+                        <li>
+                            <label class="lab" for="Peso">Peso: <span>
+                                    <%= productos[i].peso %>
+                                </span>
+                            </label>
+                        </li>
+                        <li><label class="lab" for="Tamaño">Tamaño:<span>
+                                    <%= productos[i].tamano %>
+                                </span></label></li>
+                        <li><label class="lab" for="Categoria">Categoria:<span>
+                                    <%= productos[i].categoria %>
+                                </span></label></li>
+                        <li><label class="lab" for="Subcategoria">Subcategoria<span>
+                                    <%= productos[i].subcategoria %>
+                                </span></label></li>
+                        <li><label class="lab" for="Procedencia">Procedencia:<span>
+                                    <%= productos[i].procedencia %>
+                                </span></label></li>
+                        <li><label class="lab" for="Condición">Condición<span>
+                                    <%= productos[i].condicion %>
+                                </span></label></li>
+                        <li><label class="lab" for="Talla">Talla<span>
+                                    <%= productos[i].talla %>
+                                </span></label></li>
+                        <li><label class="lab" for="Color">Color<span>
+                                    <%= productos[i].color %>
+                                </span></label></li>
+                        <li><label class="lab" for="Marca">Marca:<span>
+                                    <%= productos[i].marca %>
+                                </span></label></li>
+                    </ul>
+
+
+
+
+
+
+
+                </form>
+            </div>
+        </div>
+
+
+
+
+        <% } %>
+
+            <%- include('footer') -%>
